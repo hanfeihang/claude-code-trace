@@ -198,6 +198,13 @@
   .filter-btn[data-type="assistant"].active   { background: rgba(194,65,12,0.3);   border-color: rgba(251,146,60,0.45);  box-shadow: 0 0 10px rgba(251,146,60,0.15); }
   .filter-btn[data-type="tool-result"].active { background: rgba(22,101,52,0.3);   border-color: rgba(74,222,128,0.38);  box-shadow: 0 0 10px rgba(74,222,128,0.12); }
   .filter-btn[data-type="meta"].active        { background: rgba(55,65,81,0.45);   border-color: rgba(107,114,128,0.35); }
+  /* Always-on filters (cannot turn off): default cursor, no pointer/hover affordance */
+  .filter-btn[data-type="user"],
+  .filter-btn[data-type="tool-result"],
+  .filter-btn[data-type="assistant"] {
+    cursor: default;
+    pointer-events: none;
+  }
   .filter-right { margin-left: auto; }
   #ev-search {
     background: rgba(255,245,235,0.05);
@@ -936,6 +943,8 @@
 <script>
 // ── State ──
 const activeFilters = new Set(['user','assistant','tool-result','meta']);
+/** Types that must stay visible: clicking cannot turn these filters off. */
+const FILTER_NO_HIDE = new Set(['user', 'tool-result', 'assistant']);
 let allMessages = [];
 let searchTerm = '';
 let sessionIndex = [];
@@ -1806,6 +1815,14 @@ function redrawAncestorLines(el) {
   }
 }
 
+/** Redraw LLM req→resp lines in every turn/prelude group (main timeline + subagent/orphan panels). */
+function redrawAllLLMCallLines() {
+  document.querySelectorAll('.turn-group, .prelude-group').forEach(grp => {
+    grp.querySelectorAll(':scope > .llm-call-line').forEach(l => l.remove());
+    drawLLMCallLines(grp);
+  });
+}
+
 // ── Render ──
 function hideWelcome() {
   const w=document.getElementById('welcome'); if(w)w.style.display='none';
@@ -2115,8 +2132,14 @@ function buildBlockContent(block) {
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const type=btn.dataset.type;
-    if (activeFilters.has(type)){activeFilters.delete(type);btn.classList.remove('active');}
-    else{activeFilters.add(type);btn.classList.add('active');}
+    if (activeFilters.has(type)) {
+      if (FILTER_NO_HIDE.has(type)) return;
+      activeFilters.delete(type);
+      btn.classList.remove('active');
+    } else {
+      activeFilters.add(type);
+      btn.classList.add('active');
+    }
     applyFilters();
   });
 });
@@ -2128,23 +2151,18 @@ function applyFilters() {
     const ok=activeFilters.has(item.dataset.type)&&(!searchTerm||(item.dataset.search||'').includes(searchTerm));
     item.classList.toggle('hidden',!ok);
   });
+  redrawAllLLMCallLines();
 }
 
 document.getElementById('expand-all').addEventListener('click', ()=>{
   document.querySelectorAll('.tl-card').forEach(c=>c.classList.add('open'));
   document.querySelectorAll('.block').forEach(b=>b.classList.add('open'));
-  document.querySelectorAll('.turn-group, .prelude-group').forEach(grp=>{
-    grp.querySelectorAll(':scope > .llm-call-line').forEach(l=>l.remove());
-    drawLLMCallLines(grp);
-  });
+  redrawAllLLMCallLines();
 });
 document.getElementById('collapse-all').addEventListener('click', ()=>{
   document.querySelectorAll('.tl-card').forEach(c=>c.classList.remove('open'));
   document.querySelectorAll('.block').forEach(b=>b.classList.remove('open'));
-  document.querySelectorAll('.turn-group, .prelude-group').forEach(grp=>{
-    grp.querySelectorAll(':scope > .llm-call-line').forEach(l=>l.remove());
-    drawLLMCallLines(grp);
-  });
+  redrawAllLLMCallLines();
 });
 
 // ── Stats ──
