@@ -1723,31 +1723,89 @@ function groupConsecutive(messages) {
   return groups;
 }
 
+function groupPrimaryType(group) {
+  return group.messages[0]?.type;
+}
+
+/** Client Log rows — ignored when deciding whether sends/returns are consecutive. */
+function isClientLogGroup(group) {
+  return groupPrimaryType(group) === 'meta';
+}
+
+function isSendLikeGroup(group) {
+  const t = groupPrimaryType(group);
+  return t === 'user' || t === 'tool-result';
+}
+
+function isReturnLikeGroup(group) {
+  return groupPrimaryType(group) === 'assistant';
+}
+
 // For a list of groups (from groupConsecutive), compute LLM-call bracket markings.
 // Each group is marked 'req' | 'mid' | 'resp' | null.
-// req = first send of a call (user text or first tool-result run)
-// resp = first assistant response after that req
-// mid = everything in between
+// req = first send in a consecutive send run (user / tool-result); Client Log does not break the run.
+// resp = last assistant in the following consecutive return run; Client Log does not break the run.
+// mid = other sends, other assistants, and Client Log that sits inside an open call.
 function getGroupMarkings(groups) {
   const markings = new Array(groups.length).fill(null);
-  let reqIdx = null, callIdx = 0;
-  for (let i = 0; i < groups.length; i++) {
-    const t = groups[i].messages[0]?.type;
-    if (t === 'user' || t === 'tool-result') {
-      if (reqIdx === null) { reqIdx = i; markings[i] = {mark:'req', callIdx}; }
-      else { markings[i] = {mark:'mid', callIdx}; }
-    } else if (t === 'assistant') {
-      if (reqIdx !== null) {
-        markings[i] = {mark:'resp', callIdx};
-        for (let k = reqIdx + 1; k < i; k++) if (!markings[k]) markings[k] = {mark:'mid', callIdx};
-        reqIdx = null; callIdx++;
-      }
-    } else {
-      if (reqIdx !== null) markings[i] = {mark:'mid', callIdx};
+  let callIdx = 0;
+  let i = 0;
+  while (i < groups.length) {
+    while (i < groups.length && isClientLogGroup(groups[i])) i++;
+    if (i >= groups.length) break;
+    if (!isSendLikeGroup(groups[i])) {
+      i++;
+      continue;
     }
-  }
-  if (reqIdx !== null) {
-    for (let k = reqIdx + 1; k < groups.length; k++) if (!markings[k]) markings[k] = {mark:'mid', callIdx};
+
+    const reqI = i;
+    markings[reqI] = { mark: 'req', callIdx };
+    i++;
+    while (i < groups.length) {
+      if (isClientLogGroup(groups[i])) {
+        markings[i] = { mark: 'mid', callIdx };
+        i++;
+        continue;
+      }
+      if (isSendLikeGroup(groups[i])) {
+        markings[i] = { mark: 'mid', callIdx };
+        i++;
+        continue;
+      }
+      break;
+    }
+    while (i < groups.length && isClientLogGroup(groups[i])) {
+      markings[i] = { mark: 'mid', callIdx };
+      i++;
+    }
+
+    const retIs = [];
+    while (i < groups.length) {
+      if (isClientLogGroup(groups[i])) {
+        markings[i] = { mark: 'mid', callIdx };
+        i++;
+        continue;
+      }
+      if (isReturnLikeGroup(groups[i])) {
+        retIs.push(i);
+        i++;
+        continue;
+      }
+      break;
+    }
+
+    if (!retIs.length) {
+      for (let k = reqI + 1; k < groups.length; k++) {
+        if (markings[k] == null) markings[k] = { mark: 'mid', callIdx };
+      }
+      callIdx++;
+      break;
+    }
+    const lastRet = retIs[retIs.length - 1];
+    for (const ri of retIs) {
+      markings[ri] = { mark: ri === lastRet ? 'resp' : 'mid', callIdx };
+    }
+    callIdx++;
   }
   return markings;
 }
