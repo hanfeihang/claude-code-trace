@@ -12,10 +12,11 @@
     --text-muted: #b8a898;
     --text-dim:   #8c7e72;
 
-    --c-user:   #60a5fa;
-    --c-asst:   #fb923c;
-    --c-tool-r: #4ade80;
-    --c-meta:   #6b7280;
+    --c-user:     #60a5fa;
+    --c-injected: #a78bfa;
+    --c-asst:     #fb923c;
+    --c-tool-r:   #4ade80;
+    --c-meta:     #6b7280;
     --c-think:  #fbbf24;
     --c-tcall:  #f97316;
   }
@@ -195,6 +196,7 @@
   .filter-btn .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .filter-btn.active { color: #fff; }
   .filter-btn[data-type="user"].active        { background: rgba(37,99,235,0.3);   border-color: rgba(96,165,250,0.45);  box-shadow: 0 0 10px rgba(96,165,250,0.15); }
+  .filter-btn[data-type="injected"].active   { background: rgba(109,40,217,0.3);  border-color: rgba(167,139,250,0.45); box-shadow: 0 0 10px rgba(167,139,250,0.15); }
   .filter-btn[data-type="assistant"].active   { background: rgba(194,65,12,0.3);   border-color: rgba(251,146,60,0.45);  box-shadow: 0 0 10px rgba(251,146,60,0.15); }
   .filter-btn[data-type="tool-result"].active { background: rgba(22,101,52,0.3);   border-color: rgba(74,222,128,0.38);  box-shadow: 0 0 10px rgba(74,222,128,0.12); }
   .filter-btn[data-type="meta"].active        { background: rgba(55,65,81,0.45);   border-color: rgba(107,114,128,0.35); }
@@ -401,6 +403,8 @@
   /* Colors per type */
   .tl-item[data-type="user"]        .tl-dot  { background: var(--c-user); box-shadow: 0 0 8px rgba(96,165,250,.6), 0 0 18px rgba(96,165,250,.2); }
   .tl-item[data-type="user"]        .tl-line { background: linear-gradient(to bottom, rgba(96,165,250,.35), rgba(96,165,250,.04)); }
+  .tl-item[data-type="injected"]    .tl-dot  { background: var(--c-injected); box-shadow: 0 0 8px rgba(167,139,250,.5), 0 0 18px rgba(167,139,250,.15); }
+  .tl-item[data-type="injected"]    .tl-line { background: linear-gradient(to bottom, rgba(167,139,250,.25), rgba(167,139,250,.03)); }
   /* assistant and tool-result: neutral dots, no color, same size as user */
   .tl-item[data-type="assistant"]   .tl-dot  { background: rgba(255,245,235,0.2); }
   .tl-item[data-type="assistant"]   .tl-line { background: rgba(255,245,235,0.07); }
@@ -420,12 +424,14 @@
     transition: border-color .15s, box-shadow .15s;
   }
   .tl-item[data-type="user"]        .tl-card { background: rgba(96,165,250,0.13);  border-color: rgba(96,165,250,0.26); }
+  .tl-item[data-type="injected"]    .tl-card { background: rgba(167,139,250,0.10); border-color: rgba(167,139,250,0.22); }
   .tl-item[data-type="assistant"]   .tl-card { background: rgba(251,146,60,0.13);  border-color: rgba(251,146,60,0.26); }
   .tl-item[data-type="tool-result"] .tl-card { background: rgba(74,222,128,0.10);  border-color: rgba(74,222,128,0.22); }
   .tl-item[data-type="meta"]        .tl-card { background: rgba(255,245,235,0.05); border-color: rgba(255,245,235,0.09); opacity: .7; }
   .tl-item.is-error .tl-card { border-color: rgba(239,68,68,.4) !important; box-shadow: 0 0 16px rgba(239,68,68,0.1); }
 
   .tl-item[data-type="user"]:hover        .tl-card { border-color: rgba(96,165,250,0.4);  box-shadow: 0 0 22px rgba(96,165,250,0.09); }
+  .tl-item[data-type="injected"]:hover    .tl-card { border-color: rgba(167,139,250,0.35); box-shadow: 0 0 22px rgba(167,139,250,0.08); }
   .tl-item[data-type="assistant"]:hover   .tl-card { border-color: rgba(251,146,60,0.4);  box-shadow: 0 0 22px rgba(251,146,60,0.09); }
   .tl-item[data-type="tool-result"]:hover .tl-card { border-color: rgba(74,222,128,0.32); box-shadow: 0 0 22px rgba(74,222,128,0.08); }
 
@@ -443,11 +449,13 @@
     border: 1px solid transparent;
   }
   .type-chip.user        { background: rgba(96,165,250,.16);  color: #bfdbfe; border-color: rgba(96,165,250,0.26); }
+  .type-chip.injected    { background: rgba(167,139,250,.13); color: #ddd6fe; border-color: rgba(167,139,250,0.25); font-style: italic; }
   .type-chip.assistant   { background: rgba(251,146,60,.16);  color: #fed7aa; border-color: rgba(251,146,60,0.26); }
   .type-chip.tool-result { background: rgba(74,222,128,.13);  color: #bbf7d0; border-color: rgba(74,222,128,0.23); }
   .type-chip.meta        { background: rgba(107,114,128,.18); color: #d1d5db; border-color: rgba(107,114,128,0.26); }
   .dir-arrow { font-size: 12px; font-weight: 700; flex-shrink: 0; }
   .tl-item[data-type="user"]        .dir-arrow { color: #93c5fd; }
+  .tl-item[data-type="injected"]    .dir-arrow { color: #c4b5fd; }
   .tl-item[data-type="assistant"]   .dir-arrow { color: #fdba74; }
   .tl-item[data-type="tool-result"] .dir-arrow { color: #86efac; }
   .tl-item[data-type="meta"]        .dir-arrow { color: var(--text-dim); }
@@ -916,7 +924,7 @@
     <div id="filter-bar">
       <span style="font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;">→ Send</span>
       <button class="filter-btn active" data-type="user"><span class="dot" style="background:var(--c-user)"></span>User Input</button>
-      <button class="filter-btn active" data-type="tool-result"><span class="dot" style="background:var(--c-tool-r)"></span>Tool Result</button>
+<button class="filter-btn active" data-type="tool-result"><span class="dot" style="background:var(--c-tool-r)"></span>Tool Result</button>
       <span style="font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-left:4px;">← Return</span>
       <button class="filter-btn active" data-type="assistant"><span class="dot" style="background:var(--c-asst)"></span>Assistant</button>
       <span style="display:inline-block;width:1px;height:16px;background:var(--text-dim);opacity:.35;margin:0 6px;vertical-align:middle;"></span>
@@ -942,7 +950,7 @@
 
 <script>
 // ── State ──
-const activeFilters = new Set(['user','assistant','tool-result','meta']);
+const activeFilters = new Set(['user','injected','assistant','tool-result','meta']);
 /** Types that must stay visible: clicking cannot turn these filters off. */
 const FILTER_NO_HIDE = new Set(['user', 'tool-result', 'assistant']);
 let allMessages = [];
@@ -1604,17 +1612,12 @@ function parseUserMsg(obj, base) {
       preview: text.slice(0,150).replace(/\n/g,' ')||'(empty)',
       blocks};
   }
-  const isMeta = obj.isMeta||(typeof content==='string'&&(content.includes('<local-command-caveat>')||content.includes('<command-name>')));
-  if (isMeta) {
-    const text=contentValueToText(content);
-    return {...base, type:'meta', direction:'log', preview:text.replace(/<[^>]+>/g,'').trim().slice(0,150), blocks:[{kind:'raw',label:'System',content:text}]};
-  }
-  if (Array.isArray(content)&&content.some(c=>c.type==='text'&&c.text?.includes('interrupted'))) {
-    const text=contentValueToText(content);
-    return {...base, type:'meta', direction:'log', preview:text.slice(0,150), blocks:[{kind:'raw',label:'Interrupted',content:text}]};
-  }
   const text=contentValueToText(content);
-  return {...base, type:'user', direction:'send', preview:text.trim().slice(0,150),
+  if (obj.isMeta) {
+    return {...base, type:'injected', direction:'send', preview:text.replace(/<[^>]+>/g,'').trim().slice(0,150),
+      blocks:contentToBlocks(content, 'Injected'), promptId:obj.promptId};
+  }
+  return {...base, type:'user', direction:'send', preview:text.replace(/<[^>]+>/g,'').trim().slice(0,150),
     blocks:contentToBlocks(content, 'User Input'), promptId:obj.promptId, permissionMode:obj.permissionMode};
 }
 
@@ -1712,7 +1715,7 @@ function groupConsecutive(messages) {
   for (const msg of messages) {
     let key = null;
     if (msg.type === 'assistant' && msg.raw?.requestId) key = 'req:' + msg.raw.requestId;
-    else if ((msg.type === 'user' || msg.type === 'tool-result') && msg.promptId) key = 'pid:' + msg.promptId;
+    else if ((msg.type === 'user' || msg.type === 'injected' || msg.type === 'tool-result') && msg.promptId) key = 'pid:' + msg.promptId;
     const last = groups[groups.length - 1];
     if (last && key && last.key === key) {
       last.messages.push(msg);
@@ -1733,8 +1736,7 @@ function isClientLogGroup(group) {
 }
 
 function isSendLikeGroup(group) {
-  const t = groupPrimaryType(group);
-  return t === 'user' || t === 'tool-result';
+  return group.key?.startsWith('pid:');
 }
 
 function isReturnLikeGroup(group) {
@@ -2040,7 +2042,7 @@ function buildCard(msg, timeStr, delta) {
   const tokStr=(totalIn||totalOut)?`↑${fmtNum(totalIn)} ↓${fmtNum(totalOut)}`:'';
   const modelShort=(msg.model||'').replace('claude-','').slice(0,16);
 
-  const typeLabel = msg.type==='tool-result'?'Tool Result':msg.type==='meta'?'Log':msg.type.charAt(0).toUpperCase()+msg.type.slice(1);
+  const typeLabel = msg.type==='tool-result'?'Tool Result':msg.type==='meta'?'Log':msg.type==='injected'?'Injected':'User Input';
   const groupCountBadge = msg.groupCount > 1 ? `<span class="group-count">×${msg.groupCount}</span>` : '';
   const groupKeyLabel = msg.groupKey
     ? `<span class="group-key">${msg.groupKey.startsWith('req:') ? msg.groupKey.slice(4,14)+'…' : '#'+msg.groupKey.slice(4,12)}</span>`
